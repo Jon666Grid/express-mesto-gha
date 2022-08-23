@@ -1,0 +1,33 @@
+{
+  "name": "express-mesto-gha",
+  "version": "1.0.0",
+  "description": "[![Tests](https://github.com/yandex-praktikum/express-mesto-gha/actions/workflows/tests-13-sprint.yml/badge.svg)](https://github.com/yandex-praktikum/express-mesto-gha/actions/workflows/tests-13-sprint.yml) \r [![Tests](https://github.com/yandex-praktikum/express-mesto-gha/actions/workflows/tests-14-sprint.yml/badge.svg)](https://github.com/yandex-praktikum/express-mesto-gha/actions/workflows/tests-13-sprint.yml)\r # Проект Mesto фронтенд + бэкенд",
+  "main": "index.js",
+  "scripts": {
+    "lint": "npx eslint",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jon666Grid/express-mesto-gha.git"
+  },
+  "author": "Evgeny Gridin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jon666Grid/express-mesto-gha/issues"
+  },
+  "homepage": "https://github.com/Jon666Grid/express-mesto-gha#readme",
+  "dependencies": {
+    "body-parser": "^1.20.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "express": "^4.18.1",
+    "mongoose": "^6.5.2",
+    "nodemon": "^2.0.19",
+    "validator": "^13.7.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.22.0"
+  }
+}
