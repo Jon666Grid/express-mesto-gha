@@ -4,7 +4,7 @@ const { badRequest, notFound, internalServerError } = require('../errors/errors'
 module.exports.getUsers = async (req, res) => {
   try {
     const users = await User.find({});
-    res.status(200).send(users);
+    res.send(users);
   } catch (e) {
     res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
   }
@@ -17,7 +17,7 @@ module.exports.getUserById = async (req, res) => {
       res.status(notFound).send({ message: `Пользователь по указанному - ${req.params.id}не найден.` });
       return;
     }
-    res.status(200).send(user);
+    res.send(user);
   } catch (e) {
     if (e.kind === 'ObjectId') {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при запросе пользователя.' });
@@ -31,7 +31,7 @@ module.exports.createUser = async (req, res) => {
   try {
     const { name, about, avatar } = req.body;
     const user = await User.create({ name, about, avatar });
-    res.status(201).send(user);
+    res.send(user);
   } catch (e) {
     if (e.name === 'ValidationError') {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при создании пользователя.' });
@@ -52,7 +52,7 @@ module.exports.updateUser = async (req, res) => {
       res.status(notFound).send({ message: `Пользователь по указанному - ${req.user._id}не найден.` });
       return;
     }
-    res.status(200).send({ data: user });
+    res.send({ data: user });
   } catch (e) {
     if (e.name === 'ValidationError') {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
@@ -73,7 +73,7 @@ module.exports.updateAvatar = async (req, res) => {
       res.status(notFound).send({ message: `Пользователь по указанному - ${req.user._id}не найден.` });
       return;
     }
-    res.status(200).send(user);
+    res.send(user);
   } catch (e) {
     if (e.name === 'ValidationError') {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
