@@ -1,5 +1,7 @@
 const Card = require('../models/card');
-const { badRequest, notFound, internalServerError } = require('../errors/errors');
+const {
+  badRequest, notFound, internalServerError, forbiddenError,
+} = require('../errors/errors');
 
 module.exports.getCards = async (req, res) => {
   try {
@@ -13,8 +15,8 @@ module.exports.getCards = async (req, res) => {
 module.exports.deleteCard = async (req, res) => {
   try {
     const card = await Card.findByIdAndRemove(req.params.cardId);
-    if (!card) {
-      res.status(notFound).send({ message: `Пользователь по указанному - ${req.params.cardId} не найден.` });
+    if (card.owner.toString() === !req.user._id) {
+      res.status(forbiddenError).send({ message: 'В доступе отказано' });
       return;
     }
     res.send(card);
