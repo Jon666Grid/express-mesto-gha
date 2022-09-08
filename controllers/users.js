@@ -54,28 +54,30 @@ module.exports.createUser = async (req, res) => {
   }
 };
 
-module.exports.login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findUserByCredentials(email, password);
-    res.send({
-      token: jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' }),
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      res.send({
+        token: jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'secret', { expiresIn: '7d' }),
+      });
+    })
+    .catch((err) => {
+      res.status(authError).send({ message: err.message });
     });
-  } catch (e) {
-    res.status(authError).send({ message: e.message });
-  }
 };
 
 module.exports.getMyUser = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.params.id);
     if (!user) {
       res.status(notFound).send({ message: `Пользователь по указанному - ${req.params.id}не найден.` });
       return;
     }
     res.send(user);
   } catch (e) {
-    if (e.name === 'ValidationError') {
+    if (e.kind === 'ObjectId') {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при запросе пользователя.' });
       return;
     }
