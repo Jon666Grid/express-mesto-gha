@@ -1,11 +1,9 @@
 require('dotenv').config();
-
-const { NODE_ENV, JWT_SECRET } = process.env;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
-  badRequest, notFound, internalServerError, conflictError, authError,
+  badRequest, notFound, internalServerError, conflictError,
 } = require('../errors/errors');
 
 module.exports.getUsers = async (req, res) => {
@@ -34,6 +32,19 @@ module.exports.getUserById = async (req, res) => {
   }
 };
 
+module.exports.getUserInfo = async (req, res, next) => {
+  const id = req.user._id;
+  try {
+    const user = await User.findById(id);
+    if (!user) {
+      return next(new Error('Пользователь не найден'));
+    }
+    return res.status(200).send(user);
+  } catch (err) {
+    return next(new Error('Ошибка на сервере'));
+  }
+};
+
 module.exports.createUser = async (req, res) => {
   try {
     const {
@@ -43,12 +54,12 @@ module.exports.createUser = async (req, res) => {
     const user = await User.create({
       name, about, avatar, email, password: hashedPassword,
     });
-    res.send({ data: user });
+    res.send(user);
   } catch (e) {
     if (e.name === 'ValidationError') {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       return;
-    } if (e.code === 11000) {
+    } if (e.name === 'MongoError' || e.code === 11000) {
       res.status(conflictError).send({ message: 'Указанный email уже занят' });
     } else res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
   }
@@ -60,29 +71,12 @@ module.exports.login = (req, res) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       res.send({
-        token: jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'secret', { expiresIn: '7d' }),
+        token: jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' }),
       });
     })
     .catch((err) => {
-      res.status(authError).send({ message: err.message });
+      res.status(401).send({ message: err.message });
     });
-};
-
-module.exports.getMyUser = async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) {
-      res.status(notFound).send({ message: `Пользователь по указанному - ${req.params.id}не найден.` });
-      return;
-    }
-    res.send(user);
-  } catch (e) {
-    if (e.kind === 'ObjectId') {
-      res.status(badRequest).send({ message: 'Переданы некорректные данные при запросе пользователя.' });
-      return;
-    }
-    res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
-  }
 };
 
 module.exports.updateUser = async (req, res) => {

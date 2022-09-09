@@ -3,9 +3,9 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { createUser, login } = require('./controllers/users');
+const { validLogin, validCreateUser } = require('./middlewares/validators');
 const auth = require('./middlewares/auth');
 const { notFound } = require('./errors/errors');
-const { validLogin, validCreateUser } = require('./middlewares/validators');
 const users = require('./routes/users');
 const cards = require('./routes/cards');
 
@@ -20,8 +20,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: false,
 });
 
-app.post('/signin', validLogin, login);
 app.post('/signup', validCreateUser, createUser);
+app.post('/signin', validLogin, login);
 
 app.use('/users', auth, users);
 app.use('/cards', auth, cards);
