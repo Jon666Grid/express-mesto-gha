@@ -1,13 +1,12 @@
 const express = require('express');
-require('dotenv').config();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { createUser, login } = require('./controllers/users');
-const { validLogin, validCreateUser } = require('./middlewares/validators');
-const auth = require('./middlewares/auth');
 const { notFound } = require('./errors/errors');
 const users = require('./routes/users');
 const cards = require('./routes/cards');
+const auth = require('./middlewares/auth');
+const { validLogin, validCreateUser } = require('./middlewares/validators');
 
 const { PORT = 3000 } = process.env;
 const app = express();

@@ -1,11 +1,8 @@
-require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-
-const { JWT_SECRET } = process.env;
 const {
-  badRequest, notFound, internalServerError, conflictError,
+  badRequest, notFound, internalServerError, conflictError, authError,
 } = require('../errors/errors');
 
 module.exports.getUsers = async (req, res) => {
@@ -34,16 +31,21 @@ module.exports.getUserById = async (req, res) => {
   }
 };
 
-module.exports.getUserInfo = async (req, res, next) => {
-  const id = req.user._id;
+module.exports.getUserInfo = async (req, res) => {
   try {
-    const user = await User.findById(id);
+    const { _id } = req.user;
+    const user = await User.findById(_id);
     if (!user) {
-      return next(new Error('Пользователь не найден'));
+      res.status(notFound).send({ message: `Пользователь по указанному - ${_id}не найден.` });
+      return;
     }
-    return res.status(200).send(user);
-  } catch (err) {
-    return next(new Error('Ошибка на сервере'));
+    res.send(user);
+  } catch (e) {
+    if (e.kind === 'ObjectId') {
+      res.status(badRequest).send({ message: 'Переданы некорректные данные при запросе пользователя.' });
+      return;
+    }
+    res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
   }
 };
 
@@ -58,27 +60,11 @@ module.exports.createUser = async (req, res) => {
     });
     res.send(user);
   } catch (e) {
-    if (e.name === 'ValidationError') {
-      res.status(badRequest).send({ message: 'Переданы некорректные данные при создании пользователя.' });
-      return;
-    } if (e.name === 'MongoError' || e.code === 11000) {
+    if (e.code === 11000) {
       res.status(conflictError).send({ message: 'Указанный email уже занят' });
-    } else res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
+      return;
+    } res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
   }
-};
-
-module.exports.login = (req, res) => {
-  const { email, password } = req.body;
-
-  return User.findUserByCredentials(email, password)
-    .then((user) => {
-      res.send({
-        token: jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' }),
-      });
-    })
-    .catch((e) => {
-      res.status(401).send({ message: e.message });
-    });
 };
 
 module.exports.updateUser = async (req, res) => {
@@ -120,5 +106,20 @@ module.exports.updateAvatar = async (req, res) => {
       return;
     }
     res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
+  }
+};
+
+module.exports.login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findUserByCredentials(email, password);
+    if (!user || !password) {
+      res.status(notFound).send({ message: 'Неправильные почта или пароль' });
+      return;
+    }
+    const token = jwt.sign({ _id: user._id }, 'SECRET', { expiresIn: '7d' });
+    res.send({ token });
+  } catch (e) {
+    res.status(authError).send({ message: 'Вы не авторизованы' });
   }
 };
