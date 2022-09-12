@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
 const { createUser, login } = require('./controllers/users');
 const users = require('./routes/users');
 const cards = require('./routes/cards');
@@ -25,9 +26,12 @@ app.post('/signin', validLogin, login);
 
 app.use('/users', auth, users);
 app.use('/cards', auth, cards);
+
 app.use((req, res) => {
   res.status(notFound).send({ message: 'Запрашиваемый пользователь не найден' });
 });
+
+app.use(errors());
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console

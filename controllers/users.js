@@ -19,12 +19,12 @@ module.exports.getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
-      res.status(notFound).send({ message: `Пользователь по указанному - ${req.params.id}не найден.` });
+      res.status(notFound).send({ message: `Пользователь по указанному - ${req.params._id}не найден.` });
       return;
     }
     res.send(user);
   } catch (e) {
-    if (e.kind === 'ObjectId') {
+    if (e.name === 'CastError') {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при запросе пользователя.' });
       return;
     }
@@ -34,15 +34,14 @@ module.exports.getUserById = async (req, res) => {
 
 module.exports.getUserInfo = async (req, res) => {
   try {
-    const { _id } = req.user._id;
-    const user = await User.findById(_id);
+    const user = await User.findById(req.user._id);
     if (!user) {
       res.status(notFound).send({ message: 'Пользователь не найден.' });
       return;
     }
     res.send(user);
   } catch (e) {
-    if (e.kind === 'ObjectId') {
+    if (e.name === 'CastError') {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при запросе пользователя.' });
       return;
     }
@@ -54,6 +53,9 @@ module.exports.createUser = async (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
+  if (!email || !password) {
+    res.status(authError).send({ message: 'Пароль или почта некорректны' });
+  }
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
@@ -65,7 +67,7 @@ module.exports.createUser = async (req, res) => {
       res.status(badRequest).send({ message: 'Переданы некорректные данные.' });
       return;
     }
-    if (e.code === 11000) {
+    if (e.name === 'MongoError' || e.code === 11000) {
       res.status(conflictError).send({ message: 'Указанный email уже занят' });
       return;
     } res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
@@ -85,7 +87,7 @@ module.exports.updateUser = async (req, res) => {
     }
     res.send({ data: user });
   } catch (e) {
-    if (e.name === 'ValidationError') {
+    if (e.name === 'ValidationError' || e.name === 'CastError') {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
       return;
     }
@@ -106,7 +108,7 @@ module.exports.updateAvatar = async (req, res) => {
     }
     res.send(user);
   } catch (e) {
-    if (e.name === 'ValidationError') {
+    if (e.name === 'ValidationError' || e.name === 'CastError') {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
       return;
     }
@@ -118,8 +120,8 @@ module.exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findUserByCredentials(email, password);
-    if (!user || !password) {
-      res.status(notFound).send({ message: 'Неправильные почта или пароль' });
+    if (!user) {
+      res.status(notFound).send({ message: 'Пользователь не найден.' });
       return;
     }
     const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'key', { expiresIn: '7d' });
