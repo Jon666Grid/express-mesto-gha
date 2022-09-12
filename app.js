@@ -7,6 +7,7 @@ const { createUser, login } = require('./controllers/users');
 const users = require('./routes/users');
 const cards = require('./routes/cards');
 const auth = require('./middlewares/auth');
+const errorHandler = require('./middlewares/errorHandler');
 const { validLogin, validCreateUser } = require('./middlewares/validators');
 const { notFound } = require('./errors/errors');
 
@@ -32,6 +33,7 @@ app.use((req, res) => {
 });
 
 app.use(errors());
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console

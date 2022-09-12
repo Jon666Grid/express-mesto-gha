@@ -3,19 +3,19 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
-  badRequest, notFound, internalServerError, conflictError, authError,
+  badRequest, notFound, conflictError, authError,
 } = require('../errors/errors');
 
-module.exports.getUsers = async (req, res) => {
+module.exports.getUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
     res.send(users);
   } catch (e) {
-    res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
+    next(e);
   }
 };
 
-module.exports.getUserById = async (req, res) => {
+module.exports.getUserById = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
@@ -28,14 +28,13 @@ module.exports.getUserById = async (req, res) => {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при запросе пользователя.' });
       return;
     }
-    res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
+    next(e);
   }
 };
 
-module.exports.getUserInfo = async (req, res) => {
+module.exports.getUserInfo = async (req, res, next) => {
   try {
-    const { userId } = req.user;
-    const user = await User.findById(userId);
+    const user = await User.findById(req.user._id);
     if (!user) {
       res.status(notFound).send({ message: 'Пользователь не найден.' });
       return;
@@ -46,11 +45,11 @@ module.exports.getUserInfo = async (req, res) => {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при запросе пользователя.' });
       return;
     }
-    res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
+    next(e);
   }
 };
 
-module.exports.createUser = async (req, res) => {
+module.exports.createUser = async (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -71,11 +70,12 @@ module.exports.createUser = async (req, res) => {
     if (e.name === 'MongoError' || e.code === 11000) {
       res.status(conflictError).send({ message: 'Указанный email уже занят' });
       return;
-    } res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
+    }
+    next(e);
   }
 };
 
-module.exports.updateUser = async (req, res) => {
+module.exports.updateUser = async (req, res, next) => {
   const { name, about } = req.body;
   try {
     const user = await User.findByIdAndUpdate(
@@ -92,11 +92,11 @@ module.exports.updateUser = async (req, res) => {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
       return;
     }
-    res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
+    next(e);
   }
 };
 
-module.exports.updateAvatar = async (req, res) => {
+module.exports.updateAvatar = async (req, res, next) => {
   const { avatar } = req.body;
   try {
     const user = await User.findByIdAndUpdate(
@@ -113,7 +113,7 @@ module.exports.updateAvatar = async (req, res) => {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
       return;
     }
-    res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
+    next(e);
   }
 };
 

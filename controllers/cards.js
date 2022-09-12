@@ -1,18 +1,18 @@
 const Card = require('../models/card');
 const {
-  badRequest, notFound, internalServerError, forbiddenError,
+  badRequest, notFound, forbiddenError,
 } = require('../errors/errors');
 
-module.exports.getCards = async (req, res) => {
+module.exports.getCards = async (req, res, next) => {
   try {
     const cards = await Card.find({});
     res.send(cards);
   } catch (e) {
-    res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
+    next(e);
   }
 };
 
-module.exports.deleteCard = async (req, res) => {
+module.exports.deleteCard = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndRemove(req.params.cardId);
     if (card.owner.toString() === !req.user._id) {
@@ -25,11 +25,11 @@ module.exports.deleteCard = async (req, res) => {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при удалении карточки' });
       return;
     }
-    res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
+    next(e);
   }
 };
 
-module.exports.createCard = async (req, res) => {
+module.exports.createCard = async (req, res, next) => {
   try {
     const { name, link } = req.body;
     const card = await Card.create({ owner: req.user._id, name, link });
@@ -39,11 +39,11 @@ module.exports.createCard = async (req, res) => {
       res.status(badRequest).send({ message: 'Переданы некорректные данные при создании карточки.' });
       return;
     }
-    res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
+    next(e);
   }
 };
 
-module.exports.likeCard = async (req, res) => {
+module.exports.likeCard = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -60,11 +60,11 @@ module.exports.likeCard = async (req, res) => {
       res.status(badRequest).send({ message: 'Переданы некорректные данные для постановки лайка.' });
       return;
     }
-    res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
+    next(e);
   }
 };
 
-module.exports.dislikeCard = async (req, res) => {
+module.exports.dislikeCard = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -81,6 +81,6 @@ module.exports.dislikeCard = async (req, res) => {
       res.status(badRequest).send({ message: 'Переданы некорректные данные для снятии лайка.' });
       return;
     }
-    res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
+    next(e);
   }
 };
