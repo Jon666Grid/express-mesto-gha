@@ -61,6 +61,10 @@ module.exports.createUser = async (req, res) => {
     });
     res.send({ data: user });
   } catch (e) {
+    if (e.name === 'ValidationError') {
+      res.status(badRequest).send({ message: 'Переданы некорректные данные.' });
+      return;
+    }
     if (e.code === 11000) {
       res.status(conflictError).send({ message: 'Указанный email уже занят' });
       return;
