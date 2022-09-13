@@ -10,7 +10,7 @@ const UnauthorizedError = require('../errors/unauthorized');
 module.exports.getUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
-    res.send(users);
+    res.send({ data: users });
   } catch (e) {
     next(e);
   }
@@ -23,10 +23,10 @@ module.exports.getUserById = async (req, res, next) => {
       next(new NotFoundError(`Пользователь по указанному - ${req.params.userId}не найден.`));
       return;
     }
-    res.send(user);
+    res.send({ data: user });
   } catch (e) {
     if (e.name === 'CastError') {
-      next(new BadRequestError('Переданы некорректные данные при запросе пользователя.'));
+      next(new ConflictError('Переданы некорректные данные при запросе пользователя.'));
       return;
     }
     next(e);
@@ -40,10 +40,10 @@ module.exports.getUserInfo = async (req, res, next) => {
       next(new NotFoundError('Пользователь не найден.'));
       return;
     }
-    res.send(user);
+    res.send({ data: user });
   } catch (e) {
     if (e.name === 'CastError') {
-      next(new BadRequestError('Переданы некорректные данные при запросе пользователя.'));
+      next(new ConflictError('Переданы некорректные данные при запросе пользователя.'));
       return;
     }
     next(e);
@@ -62,7 +62,7 @@ module.exports.createUser = async (req, res, next) => {
     res.send({ data: user });
   } catch (e) {
     if (e.name === 'ValidationError') {
-      next(new BadRequestError('Переданы некорректные данные.'));
+      next(new BadRequestError('Некорректные данные.'));
       return;
     }
     if (e.name === 'MongoError' || e.code === 11000) {
@@ -86,7 +86,7 @@ module.exports.updateUser = async (req, res, next) => {
     }
     res.send({ data: user });
   } catch (e) {
-    if (e.name === 'ValidationError' || e.name === 'CastError') {
+    if (e.name === 'ValidationError') {
       next(new BadRequestError('Переданы некорректные данные при обновлении профиля.'));
       return;
     }
@@ -105,10 +105,10 @@ module.exports.updateAvatar = async (req, res, next) => {
       next(new NotFoundError(`Пользователь по указанному - ${req.user._id}не найден.`));
       return;
     }
-    res.send(user);
+    res.send({ data: user });
   } catch (e) {
     if (e.name === 'CastError') {
-      next(new BadRequestError('Переданы некорректные данные при обновлении аватара.'));
+      next(new ConflictError('Переданы некорректные данные при обновлении аватара.'));
       return;
     }
     next(e);
