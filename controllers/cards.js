@@ -5,7 +5,7 @@ const BadRequestError = require('../errors/badRequest');
 
 module.exports.getCards = async (req, res, next) => {
   try {
-    const cards = await Card.find({});g
+    const cards = await Card.find({});
     res.send(cards);
   } catch (e) {
     next(e);
