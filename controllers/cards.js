@@ -21,7 +21,7 @@ module.exports.deleteCard = async (req, res, next) => {
       next(new ForbiddenError('Нельзя удалить чужую карточку'));
       return;
     }
-    card.remove(() => res.send('Карточка удалина'));
+    card.remove(() => res.send({ message: 'Карточка успешно удалена' }));
   } catch (e) {
     next(e);
   }
