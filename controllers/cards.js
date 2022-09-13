@@ -15,13 +15,13 @@ module.exports.getCards = async (req, res, next) => {
 module.exports.deleteCard = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const card = await Card.findById(id);
-    card.onFail(() => new NotFoundError('Нет карточки по указанному id'));
+    const card = await Card.findById(id)
+      .orFail(() => new NotFoundError('Нет карточки по указанному id'));
     if (card.owner.equals(req.user._id)) {
       next(new ForbiddenError('Нельзя удалить чужую карточку'));
       return;
     }
-    card.remove(() => res.send({ message: 'Карточка удалина' }));
+    card.remove(() => res.send('Карточка удалина'));
   } catch (e) {
     next(e);
   }
@@ -48,7 +48,7 @@ module.exports.likeCard = async (req, res, next) => {
       { new: true },
     );
     if (!card) {
-      next(new NotFoundError({ message: `Передан несуществующий ${req.user._id} карточки.` }));
+      next(new NotFoundError(`Передан несуществующий ${req.user._id} карточки.`));
       return;
     }
     res.send(card);
@@ -69,13 +69,13 @@ module.exports.dislikeCard = async (req, res, next) => {
       { new: true },
     );
     if (!card) {
-      next(new NotFoundError({ message: `Передан несуществующий ${req.user._id} карточки.` }));
+      next(new NotFoundError(`Передан несуществующий ${req.user._id} карточки.`));
       return;
     }
     res.send(card);
   } catch (e) {
     if (e.kind === 'ObjectId') {
-      next(new BadRequestError({ message: 'Переданы некорректные данные для снятии лайка.' }));
+      next(new BadRequestError('Переданы некорректные данные для снятии лайка.'));
       return;
     }
     next(e);
