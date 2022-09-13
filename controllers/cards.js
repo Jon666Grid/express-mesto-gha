@@ -1,11 +1,11 @@
 const Card = require('../models/card');
 const NotFoundError = require('../errors/notFound');
-const ForbiddenError = require('../errors/notFound');
-const BadRequestError = require('../errors/notFound');
+const ForbiddenError = require('../errors/forbidden');
+const BadRequestError = require('../errors/badRequest');
 
 module.exports.getCards = async (req, res, next) => {
   try {
-    const cards = await Card.find({});
+    const cards = await Card.find({});g
     res.send(cards);
   } catch (e) {
     next(e);

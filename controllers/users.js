@@ -3,9 +3,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/notFound');
-const BadRequestError = require('../errors/notFound');
-const ConflictError = require('../errors/notFound');
-const UnauthorizedError = require('../errors/notFound');
+const BadRequestError = require('../errors/badRequest');
+const ConflictError = require('../errors/conflict');
+const UnauthorizedError = require('../errors/unauthorized');
 
 module.exports.getUsers = async (req, res, next) => {
   try {
