@@ -1,4 +1,4 @@
-const { NODE_ENV, JWT_SECRET = 'key' } = process.env;
+const { JWT_SECRET = 'key' } = process.env;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
