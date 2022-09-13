@@ -1,4 +1,4 @@
-const { NODE_ENV, JWT_SECRET } = process.env;
+const { NODE_ENV, JWT_SECRET = 'key' } = process.env;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
@@ -123,7 +123,7 @@ module.exports.login = async (req, res, next) => {
       next(new NotFoundError('Пользователь не найден.'));
       return;
     }
-    const token = jwt.sign({ _id: user._id }, NODE_ENV ? JWT_SECRET : 'key', { expiresIn: '7d' });
+    const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
     res.send({ token });
   } catch (e) {
     next(new UnauthorizedError('Вы не авторизованы'));
