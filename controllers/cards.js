@@ -13,11 +13,11 @@ module.exports.getCards = async (req, res, next) => {
 };
 
 module.exports.deleteCard = async (req, res, next) => {
-  const { id } = req.params;
+  const { cardId } = req.params;
   try {
-    const card = await Card.findById(id)
+    const card = await Card.findById(cardId)
       .orFail(() => new NotFoundError('Нет карточки по указанному id'));
-    if (card.owner.equals(req.user._id)) {
+    if (!card.owner.equals(req.user._id)) {
       next(new ForbiddenError('Нельзя удалить чужую карточку'));
       return;
     }
