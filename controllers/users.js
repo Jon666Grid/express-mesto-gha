@@ -26,7 +26,7 @@ module.exports.getUserById = async (req, res, next) => {
     res.send({ data: user });
   } catch (e) {
     if (e.name === 'CastError') {
-      next(new ConflictError('Переданы некорректные данные при запросе пользователя.'));
+      next(new BadRequestError('Переданы некорректные данные при запросе пользователя.'));
       return;
     }
     next(e);
@@ -43,7 +43,7 @@ module.exports.getUserInfo = async (req, res, next) => {
     res.send({ data: user });
   } catch (e) {
     if (e.name === 'CastError') {
-      next(new ConflictError('Переданы некорректные данные при запросе пользователя.'));
+      next(new BadRequestError('Переданы некорректные данные при запросе пользователя.'));
       return;
     }
     next(e);
@@ -107,8 +107,8 @@ module.exports.updateAvatar = async (req, res, next) => {
     }
     res.send({ data: user });
   } catch (e) {
-    if (e.name === 'CastError') {
-      next(new ConflictError('Переданы некорректные данные при обновлении аватара.'));
+    if (e.name === 'ValidationError') {
+      next(new BadRequestError('Переданы некорректные данные при обновлении аватара.'));
       return;
     }
     next(e);

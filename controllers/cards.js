@@ -12,6 +12,12 @@ module.exports.getCards = async (req, res, next) => {
   }
 };
 
+// не совсем понимаю как реализовать вашь пример :
+// return card.remove()
+//         .then(() => res.send({ message: 'Карточка удалена' }));
+//         в async await;
+// return  при этом работает только черз исключение :
+// eslint-disable-next-line consistent-return
 module.exports.deleteCard = async (req, res, next) => {
   const { cardId } = req.params;
   try {
@@ -21,7 +27,8 @@ module.exports.deleteCard = async (req, res, next) => {
       next(new ForbiddenError('Нельзя удалить чужую карточку'));
       return;
     }
-    card.remove(() => res.send({ message: 'Карточка успешно удалена' }));
+    const deletedCard = await card.remove();
+    res.send({ data: deletedCard, message: 'Карточка удалена' });
   } catch (e) {
     next(e);
   }
